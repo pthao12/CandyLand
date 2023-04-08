@@ -1,0 +1,58 @@
+# depslib dependency file v1.0
+1679543180 source:c:\users\vuongbahanh\documents\ltnc\game\base.cpp
+	"base.h"
+
+1680952158 c:\users\vuongbahanh\documents\ltnc\game\base.h
+	<bits/stdc++.h>
+	<windows.h>
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_ttf.h>
+	<SDL_mixer.h>
+	<iostream>
+	<fstream>
+	<sstream>
+	<string>
+	<vector>
+	<ctime>
+
+1680273089 source:c:\users\vuongbahanh\documents\ltnc\game\main.cpp
+	"game_run.h"
+
+1680947249 c:\users\vuongbahanh\documents\ltnc\game\game_run.h
+	"LTexture.h"
+	"game_utils.h"
+	"LButton.h"
+
+1680951778 c:\users\vuongbahanh\documents\ltnc\game\ltexture.h
+	"base.h"
+
+1680956168 source:c:\users\vuongbahanh\documents\ltnc\game\ltexture.cpp
+	"LTexture.h"
+
+1680963775 source:c:\users\vuongbahanh\documents\ltnc\game\game_run.cpp
+	"game_run.h"
+	<SDL_events.h>
+
+1680957732 source:c:\users\vuongbahanh\documents\ltnc\game\game_utils.cpp
+	"game_utils.h"
+
+1680455013 c:\users\vuongbahanh\documents\ltnc\game\lbutton.h
+	"base.h"
+	"LTexture.h"
+
+1680628986 source:c:\users\vuongbahanh\documents\ltnc\game\lbutton.cpp
+	"LButton.h"
+
+1680956295 c:\users\vuongbahanh\documents\ltnc\game\game_utils.h
+	"LButton.h"
+	"base.h"
+
+1680628986 source:c:\users\vuongbahanh\documents\ltnc\game\draw_game.cpp
+	"draw_game.h"
+
+1680627519 c:\users\vuongbahanh\documents\ltnc\game\draw_game.h
+	"LTexture.h"
+	"base.h"
+	"game_run.h"
+
