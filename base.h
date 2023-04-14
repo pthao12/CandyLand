@@ -29,13 +29,10 @@ const int ITEMS_SIZE = 75;
 const int COLUMN_NUMBER = 12;
 const int ROW_NUMBER = 7;
 const int ITEMS_NUMBER = 6;
-const int FPS = 30;
-const int frameDelay = 1000 / FPS;
 const int timeGame = 180;
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gRenderer = NULL;
 static TTF_Font* gFont = NULL;
-static SDL_Color textColor = {0xFF, 0xFF, 0xFF};
 static Mix_Music* gMusic = NULL;
 
 #endif

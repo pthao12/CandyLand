@@ -76,22 +76,18 @@ SDL_Texture* loadFromFile(string path, SDL_Renderer* gRenderer)
 bool loadMedia()
 {
     bool success = true;
-    gFont = TTF_OpenFont("OrdinaryLove-VGwm0.ttf", 60);
+    gFont = TTF_OpenFont("font/OrdinaryLove-VGwm0.ttf", 60);
     if(gFont == NULL)
     {
-        cout<< "Failed to load lazy font! SDL_ttf Error: " << TTF_GetError() << endl;
+        std::cout<< "Failed to load lazy font! SDL_ttf Error: " << TTF_GetError() << endl;
         success = false;
     }
-    else if(!start.loadFromFile("start.png", gRenderer))
+    else if(!start.loadFromFile("imgs/start.png", gRenderer))
     {
         std::cout<< "Failed to load start texture!\n";
         success = false;
     }
-    else if(!choose.loadFromFile("choose.png", gRenderer)){
-        std::cout<< "Failed to load choose texture!\n";
-        success = false;
-    }
-    else if(!gPlayButton.loadFromFile("playbutton.png", gRenderer)){
+    else if(!gPlayButton.loadFromFile("imgs/playbutton.png", gRenderer)){
         std::cout<< "Failed to load playbutton texture!\n";
         success = false;
     }
@@ -126,11 +122,20 @@ bool loadMedia()
         sizeofButton.w = 79;
         sizeofButton.h = 79;
     }
+
+    gMusic = Mix_LoadMUS("sound/Oneul - (Strawberry Dance) 🍓.mp3");
+    if( gMusic == NULL )
+	{
+		std::cout<< "Failed to load beat music! SDL_mixer Error: " << Mix_GetError() <<endl;
+		success = false;
+	}
     return success;
 }
 
 void close()
 {
+    gPlayButton.free();
+    start.free();
     TTF_CloseFont(gFont);
 	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow( gWindow );
@@ -145,57 +150,72 @@ void run()
 {
     if(!init())
 	{
-		cout<< "Failed to initialize!\n";
+		std::cout<< "Failed to initialize!\n";
 	}
     else{
         if(!loadMedia())
 		{
-			cout<< "Failed to load media!\n";
+			std::cout<< "Failed to load media!\n";
 		}
         else
         {
             bool quit = false;
             SDL_Event e;
-            int mouseX, mouseY;
-            Uint32 frameStart;
-            int frameTime;
+            bool endG = false;
             bool played = false;
             bool restart = true;
             bool pause = false;
-            int timeLeft;
-            int startTime;
+            bool music = true;
+            bool setting = true;
+            if( Mix_PlayingMusic() == 0 )
+            {
+                Mix_PlayMusic( gMusic, -1 );
+            }
             Game hehe(gRenderer, gFont);
             while(!quit)
             {
-                frameStart = SDL_GetTicks();
-                while(SDL_PollEvent(&e) != 0)
+                SDL_PollEvent(&e);
+                if(music)
                 {
-                    if(e.type == SDL_QUIT)
+                    Mix_ResumeMusic();
+                }
+                else if(!music)
+                {
+                    Mix_PauseMusic();
+                }
+                if(e.type == SDL_QUIT)
+                {
+                    quit = true;
+                }
+                if(!played){
+                    playButton.setPosition(466, 565);
+                    HandlePlayButton(&e, playButton, played, pause, restart, &play[playButton.currentSprite]);
+                    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+                    SDL_RenderClear(gRenderer);
+                    start.render(0, 0, gRenderer);
+                    gPlayButton.render(PLAY_BUTTON_POSX, PLAY_BUTTON_POSY, gRenderer, &play[playButton.currentSprite]);
+                    SDL_RenderPresent(gRenderer);
+                    endG = false;
+                }
+                if(played){
+                    if(endG == true)
                     {
-                        quit = true;
+                        LButton restartGame;
+                        LButton home;
+                        LButton exit;
+
+                        restartGame.setPosition(440, 523);
+                        home.setPosition(570, 530);
+                        exit.setPosition(698, 523);
+
+                        HandleRestartButton(&e, restartGame, restart, pause, endG, setting, &sizeofButton, gRenderer);
+                        HandleHomeButton(&e, home, played, restart, setting, &sizeofButton, gRenderer);
+                        HandleExitButton(&e, exit, &sizeofButton, gRenderer);
                     }
-                    if(!played){
-                        //cout<< "moew"<< endl;
-                        playButton.setPosition(466, 565);
-                        HandlePlayButton(&e, playButton, played, pause, restart, &play[playButton.currentSprite]);
-                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-                        SDL_RenderClear(gRenderer);
-                        start.render(0, 0, gRenderer);
-                        gPlayButton.render(PLAY_BUTTON_POSX, PLAY_BUTTON_POSY, gRenderer, &play[playButton.currentSprite]);
-                        SDL_RenderPresent(gRenderer);
-                        //cout<< "hihi"<< endl;
-                    }
-                    if(played){
-                        //cout<< "huhu"<< endl;
-                        /*
-                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-                        SDL_RenderClear(gRenderer);
-                        backGround.render(0,0, gRenderer);
-                        */
-                        settingButton.setPosition(866, 8);
-                        HandleSettingButton(&e, settingButton, pause, &sizeofButton, gRenderer);
-                        //cout<< x<<" "<<y<< endl;
-                        //cout<< gRenderer<<" **** "<<endl;
+                    else
+                    {
+                        settingButton.setPosition(883, 8);
+                        HandleSettingButton(&e, settingButton, pause, music, setting, &sizeofButton, gRenderer);
                         if(pause == true)
                         {
                             LButton resume;
@@ -209,17 +229,21 @@ void run()
                             restartGame.setPosition(558, 405);
                             mute.setPosition(558, 504);
                             unmute.setPosition(558, 504);
-                            HandleResumeButton(&e, resume, pause, &sizeofButton, gRenderer);
-                            HandleHomeButton(&e, home, played, restart, &sizeofButton, gRenderer);
-                            HandleRestartButton(&e, restartGame, restart, pause, &sizeofButton, gRenderer);
+
+                            HandleResumeButton(&e, resume, pause, setting, &sizeofButton, gRenderer);
+                            HandleHomeButton(&e, home, played, restart, setting, &sizeofButton, gRenderer);
+                            HandleRestartButton(&e, restartGame, restart, pause, endG, setting, &sizeofButton, gRenderer);
+                            if(music)
+                                HandleMuteButton(&e, mute, music, &sizeofButton, gRenderer);
+                            else
+                                HandleUnmuteButton(&e, unmute, music, &sizeofButton, gRenderer);
                         }
-                        if(pause == false && played == true)
+                        else if(pause == false && played == true)
                         {
                             int x, y;
-                            SDL_GetMouseState( &x, &y );
-                            hehe.play(&e, x, y, &restart);
+                            SDL_GetMouseState( &x, &y);
+                            hehe.play(&e, x, y, &restart, endG);
                         }
-                        //HandleSettingButton(&e, setting);
                     }
                 }
             }

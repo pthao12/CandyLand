@@ -41,6 +41,8 @@
 		<Unit filename="game_run.h" />
 		<Unit filename="game_utils.cpp" />
 		<Unit filename="game_utils.h" />
+		<Unit filename="handle_button.cpp" />
+		<Unit filename="handle_button.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

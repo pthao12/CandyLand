@@ -1,9 +1,11 @@
 #ifndef game_run_h
 #define game_run_h
 
+#include "base.h"
 #include "LTexture.h"
 #include "game_utils.h"
 #include "LButton.h"
+#include "handle_button.h"
 
 static LTexture gPlayButton;
 static LTexture start;

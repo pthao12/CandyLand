@@ -5,7 +5,6 @@
 #include "LTexture.h"
 
 static LTexture gButtonSpriteSheetTexture;
-static SDL_Rect gSpriteClips[ 4 ];
 enum LButtonSprite
 {
 	BUTTON_MOUSE_OUT = 0,

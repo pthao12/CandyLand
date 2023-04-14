@@ -23,18 +23,16 @@ start: 150 202
 end : 1050 728
 
 Clock:
-	pos: x 278 y 10
+	pos: x 257 y 10
 	space: ngang 49, dọc : 11
 	size: 75
 	start 29 - 74
 Score:
-	pos: 0 0
-	size: 413 438
-star: 
-	pos: 438 0
-	size: 101
+	pos: 538 10
+high score:
+	pos: 746 10
 setting button:
-	pos : 866 8
+	pos : 783 8
 	size: 81 81
 
 
@@ -47,7 +45,32 @@ restart
 	pos : 558 405
 mute
 	pos : 558 504
-time:
-	pos: 365 35
-score:
- 	pos: 550 35	
+star:
+	size 1: 45 45
+	pos 1 : 0 0
+
+	size 2: 58 58
+	pos 2 : 46 0
+	
+	size 3: 74 74
+	pos 3: 102 0
+
+	size 4: 94
+	pos 4: 176 0
+	
+	size 5: 110 110
+	pos 5: 270 0
+
+score: 430 282
+       550
+       670
+
+ENDGAME:
+
+resart 440 523
+home 570 530
+exit 698 523
+
+striped
+	hor: 0 474
+	hor: 130 474
