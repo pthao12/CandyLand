@@ -36,9 +36,3 @@ bool LButton::handleEvent( SDL_Event* e, SDL_Rect* buttonSize)
     }
     return inside;
 }
-void LButton::render(SDL_Rect* currentClip, SDL_Renderer* gRenderer, LTexture gButtonTexture)
-{
-    //gButtonTexture.render(0,0, gRenderer);
-    //cout<< currentClip->y<< "hihihihhihihh"<< endl;
-	gButtonTexture.render(0, 0, gRenderer, currentClip);
-}

@@ -4,7 +4,6 @@
 #include "base.h"
 #include "LTexture.h"
 
-static LTexture gButtonSpriteSheetTexture;
 enum LButtonSprite
 {
 	BUTTON_MOUSE_OUT = 0,
@@ -23,8 +22,6 @@ class LButton
 		void setPosition( int x, int y );
 
 		bool handleEvent( SDL_Event* e, SDL_Rect* buttonSize);
-
-		void render(SDL_Rect* currentClip, SDL_Renderer* gRenderer, LTexture gButtonTexture);
 
 	private:
 		SDL_Point mPosition;

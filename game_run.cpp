@@ -102,16 +102,6 @@ bool loadMedia()
         play[0].w = 270;
         play[0].h = 134;
 
-        scoreboard.x = 0;
-        scoreboard.y = 360;
-        scoreboard.w = 413;
-        scoreboard.h = 453;
-
-        score.x = 440;
-        score.y = 360;
-        score.w = 100;
-        score.h = 100;
-
         sizeofSettingButton.x = 0;
         sizeofSettingButton.y = 0;
         sizeofSettingButton.w = 81;
@@ -167,6 +157,7 @@ void run()
             bool pause = false;
             bool music = true;
             bool setting = true;
+            int pauseTime = 0;
             if( Mix_PlayingMusic() == 0 )
             {
                 Mix_PlayMusic( gMusic, -1 );
@@ -215,9 +206,10 @@ void run()
                     else
                     {
                         settingButton.setPosition(883, 8);
-                        HandleSettingButton(&e, settingButton, pause, music, setting, &sizeofButton, gRenderer);
+                        HandleSettingButton(&e, settingButton, pause, music, setting, &sizeofButton, gRenderer, pauseTime);
                         if(pause == true)
                         {
+
                             LButton resume;
                             LButton home;
                             LButton restartGame;
@@ -230,7 +222,7 @@ void run()
                             mute.setPosition(558, 504);
                             unmute.setPosition(558, 504);
 
-                            HandleResumeButton(&e, resume, pause, setting, &sizeofButton, gRenderer);
+                            HandleResumeButton(&e, resume, pause, setting, &sizeofButton, gRenderer, pauseTime);
                             HandleHomeButton(&e, home, played, restart, setting, &sizeofButton, gRenderer);
                             HandleRestartButton(&e, restartGame, restart, pause, endG, setting, &sizeofButton, gRenderer);
                             if(music)
@@ -242,7 +234,7 @@ void run()
                         {
                             int x, y;
                             SDL_GetMouseState( &x, &y);
-                            hehe.play(&e, x, y, &restart, endG);
+                            hehe.play(&e, x, y, &restart, endG, pauseTime);
                         }
                     }
                 }

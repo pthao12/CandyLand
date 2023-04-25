@@ -25,12 +25,13 @@ void HandlePlayButton(SDL_Event* e, LButton& playButton, bool& play, bool& pause
     }
 }
 
-void HandleSettingButton(SDL_Event* e, LButton& settingButton, bool& pause, bool& music, bool& settingg, SDL_Rect* buttonSize, SDL_Renderer *gRenderer)
+void HandleSettingButton(SDL_Event* e, LButton& settingButton, bool& pause, bool& music, bool& settingg, SDL_Rect* buttonSize, SDL_Renderer *gRenderer, int &pauseTime)
 {
     if(settingButton.handleEvent(e, buttonSize))
     {
         if(e->type == SDL_MOUSEBUTTONDOWN)
         {
+            pauseTime = std::clock();
             pause = true;
             LTexture setting;
             if(settingg)
@@ -74,13 +75,13 @@ void HandleSettingButton(SDL_Event* e, LButton& settingButton, bool& pause, bool
     }
 }
 
-void HandleResumeButton(SDL_Event* e, LButton& resume, bool& pause, bool& setting, SDL_Rect* buttonSize, SDL_Renderer *gRenderer)
+void HandleResumeButton(SDL_Event* e, LButton& resume, bool& pause, bool& setting, SDL_Rect* buttonSize, SDL_Renderer *gRenderer, int& pauseTime)
 {
     if(resume.handleEvent(e, buttonSize))
     {
         if(e->type == SDL_MOUSEBUTTONDOWN)
         {
-
+            pauseTime = std::clock() - pauseTime;
             pause = false;
             setting = true;
         }

@@ -10,8 +10,6 @@
 static LTexture gPlayButton;
 static LTexture start;
 static SDL_Rect play[2];
-static SDL_Rect scoreboard;
-static SDL_Rect score;
 static SDL_Rect sizeofSettingButton;
 static SDL_Rect sizeofButton;
 static LButton playButton;
