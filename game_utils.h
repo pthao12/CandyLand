@@ -16,39 +16,6 @@
 #define VERTICAL 1
 
 class Game{
-    public:
-        Game(SDL_Renderer *gRenderer, TTF_Font *gFont)
-        {
-            Renderer = gRenderer;
-            Font = gFont;
-        }
-        bool loadImage();
-        void initGame();
-        void printScoreAndTime();
-        void render();
-        void renderClock();
-        void updateTouch(int mouseX, int mouseY);
-        void swapItems(int x, int y, int u, int v);
-        void updateGame();
-        void play(SDL_Event* e, int x, int y, bool* restart, bool& endG, int& pauseTime);
-        int horizontal(int x, int y);
-        int vertical(int x, int y);
-        int eatCandy(int x, int y);
-        void decreaseRow();
-        void renderDrop(int timeDrop);
-        bool checkClear();
-        void updateBoard();
-        void eatBomb(int x, int y);
-        void eatStar(int type);
-        void eatStriped(int col, int row);
-        void renderScore();
-        void renderEnd(bool &endG);
-        void bombEffectRender(int x, int y);
-        void stripedEffectRender(int x, int y, int status);
-        void getHighScore();
-        void updateHighScore(int score);
-        void hint();
-        void renderHint(int x, int y, int u, int v);
     private:
         int items[ROW_NUMBER][COLUMN_NUMBER];
         int posX[ROW_NUMBER][COLUMN_NUMBER];
@@ -74,7 +41,48 @@ class Game{
         int left = 0, right = 0, above = 0, below = 0;
         string oldHighScore;
         int newItem();
+        bool drop = false;
+
+    public:
+        Game(SDL_Renderer *gRenderer, TTF_Font *gFont)
+        {
+            Renderer = gRenderer;
+            Font = gFont;
+        }
+
+        void play(SDL_Event* e, int x, int y, bool* restart, bool& endG, int& pauseTime);
+
+        bool loadImage();
         bool checkInit();
-        bool drop;
+        void initGame();
+        void render();
+
+        void printScoreAndTime();
+        void renderClock();
+        void renderDrop(int timeDrop);
+        void renderScore();
+        void renderChoose();
+        void renderEnd(bool &endG);
+        void renderHint(int x, int y, int u, int v);
+        void bombEffectRender(int x, int y);
+        void stripedEffectRender(int x, int y, int status);
+
+        void updateGame();
+        void updateTouch(int mouseX, int mouseY);
+        void swapItems(int x, int y, int u, int v);
+        void updateBoard();
+        void updateHighScore(int score);
+        void outOfMove();
+        bool checkClear();
+        void decreaseRow();
+        void hint();
+        void getHighScore();
+
+        int horizontal(int x, int y);
+        int vertical(int x, int y);
+        int eatCandy(int x, int y);
+        void eatBomb(int x, int y);
+        void eatStar(int type);
+        void eatStriped(int col, int row);
 };
 #endif

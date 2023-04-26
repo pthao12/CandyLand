@@ -41,25 +41,25 @@ bool Game::loadImage()
 {
     bool success = true;
     if(!backGround.loadFromFile("imgs/background.png", Renderer)){
-        std::cout<< "Failed to load background texture!\n";
+        cout<< "Failed to load background texture!\n";
         success = false;
     }
     else if(!gCandy.loadFromFile("imgs/candy.png", Renderer))
 	{
-        std::cout<< "Failed to load candy texture!\n";
+        cout<< "Failed to load candy texture!\n";
         success = false;
     }
     else if(!gClock.loadFromFile("imgs/clock.png", Renderer))
     {
-        std::cout<< "Failed to load candy texture!\n";
+        cout<< "Failed to load candy texture!\n";
     }
     else if(!choose.loadFromFile("imgs/choose.png", Renderer))
     {
-        std::cout<< "Failed to load choose texture!\n";
+        cout<< "Failed to load choose texture!\n";
     }
     else if(!gAnimation.loadFromFile("imgs/animation.png", Renderer))
     {
-        std::cout<< "Failed to load animation texture!\n";
+        cout<< "Failed to load animation texture!\n";
     }
     else
     {
@@ -162,7 +162,7 @@ void Game::printScoreAndTime()
     }
     else
     {
-        std::cout << "Failed to render time texture" << endl;
+        cout << "Failed to render time texture" << endl;
         return;
     }
 
@@ -173,14 +173,14 @@ void Game::printScoreAndTime()
         gTextTexture.render(550, 20, Renderer);
     }
     else
-        std::cout << "Failed to render score texture" << endl;
+        cout << "Failed to render score texture" << endl;
 
     if(gTextTexture.loadFromRenderedText(to_string(max(score, stringToInt(oldHighScore))), Font, textColor, Renderer))
     {
         gTextTexture.render(765, 20, Renderer);
     }
     else
-        std::cout << "Failed to render score texture" << endl;
+        cout << "Failed to render score texture" << endl;
 }
 
 void Game::bombEffectRender(int x, int y)
@@ -229,6 +229,16 @@ void Game::stripedEffectRender(int x, int y, int status)
     }
 }
 
+void Game::renderChoose()
+{
+    int x, y;
+    SDL_GetMouseState( &x, &y );
+    x = ceil((x - START_X)/ITEMS_SIZE)*ITEMS_SIZE + START_X;
+    y = ceil((y - START_Y)/ITEMS_SIZE)*ITEMS_SIZE + START_Y;
+    if(x >= START_X && x <= START_X + COLUMN_NUMBER*ITEMS_SIZE &&
+       y >= START_Y && y <= START_Y + ROW_NUMBER*ITEMS_SIZE)
+       choose.render(x, y, Renderer);
+}
 void Game::render()
 {
     SDL_SetRenderDrawColor(Renderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -243,13 +253,7 @@ void Game::render()
                gCandy.render(posX[i][j], posY[i][j], Renderer, &candy[items[i][j]]);
         }
     }
-    int x, y;
-    SDL_GetMouseState( &x, &y );
-    x = ceil((x - START_X)/ITEMS_SIZE)*ITEMS_SIZE + START_X;
-    y = ceil((y - START_Y)/ITEMS_SIZE)*ITEMS_SIZE + START_Y;
-    if(x >= START_X && x <= START_X + COLUMN_NUMBER*ITEMS_SIZE &&
-       y >= START_Y && y <= START_Y + ROW_NUMBER*ITEMS_SIZE)
-       choose.render(x, y, Renderer);
+    renderChoose();
     printScoreAndTime();
     if(!drop)
         hint();
@@ -388,8 +392,7 @@ bool Game::checkClear()
 }
 void Game::updateBoard()
 {
-    while(!checkClear())
-    {}
+    while(!checkClear());
 }
 void Game::updateGame()
 {
@@ -496,8 +499,8 @@ int Game::horizontal(int x, int y)
     left = x;
     right = x;
     if(items[y][x] == -1 || items[y][x] >= 6 ) return 0;
-    for(left; left > 0 && items[y][x] == items[y][left - 1] ; left--){}
-    for(right; right < COLUMN_NUMBER - 1 && items[y][x] == items[y][right + 1]; right++){}
+    for(left; left > 0 && items[y][x] == items[y][left - 1] ; left--);
+    for(right; right < COLUMN_NUMBER - 1 && items[y][x] == items[y][right + 1]; right++);
     if(right - left + 1 >= 3)
         return right - left + 1;
     else
@@ -509,8 +512,8 @@ int Game::vertical(int x, int y)
     above = y;
     below = y;
     if(items[y][x] == -1 || items[y][x] >= 6 ) return 0;
-    for(above; above > 0 && items[y][x] == items[above - 1][x] ; above--){}
-    for(below; below < ROW_NUMBER - 1 && items[y][x] == items[below + 1][x]; below++){}
+    for(above; above > 0 && items[y][x] == items[above - 1][x] ; above--);
+    for(below; below < ROW_NUMBER - 1 && items[y][x] == items[below + 1][x]; below++);
     if(below - above + 1 >= 3)
         return below - above + 1;
     else
@@ -626,23 +629,18 @@ void Game::eatBomb(int x, int y)
     {
         for(int j = max(x - 1, 0); j < min(max(x - 1, 0) + 3, COLUMN_NUMBER); j++)
         {
-
-            cout<< i<<" "<< j<<" "<< items[i][j]<< endl;
             if(items[i][j] == STAR)
             {
-                cout<< 5;
                 items[i][j] = -1;
                 eatStar(newItem());
             }
             else if(items[i][j] == BOMB)
             {
-                cout<< 6;
                 items[i][j] = -1;
                 eatBomb(j, i);
             }
             else if(items[i][j] == STRIPED)
             {
-                cout<< 7;
                 items[i][j] = -1;
                 stripedEffectRender(j, i, HORIZONTAL);
                 eatStriped(-1, i);
@@ -659,19 +657,16 @@ void Game::eatStriped(int col, int row)
         {
             if(items[i][col] == STAR)
             {
-                cout<< 1;
                 items[i][col] = -1;
                 eatStar(newItem());
             }
             else if(items[i][col] == BOMB)
             {
-                cout<< 2;
                 items[i][col] = -1;
                 eatBomb(col, i);
             }
             else if(items[i][col] == STRIPED)
             {
-                cout<< 11;
                 items[i][col] = -1;
                 stripedEffectRender(col, i, HORIZONTAL);
                 eatStriped(-1, i);
@@ -686,19 +681,16 @@ void Game::eatStriped(int col, int row)
         {
             if(items[row][i] == STAR)
             {
-                cout<< 3;
                 items[row][i] = -1;
                 eatStar(newItem());
             }
             else if(items[row][i] == BOMB)
             {
-                cout<< 4;
                 items[row][i] = -1;
                 eatBomb(i, row);
             }
             else if(items[row][i] == STRIPED)
             {
-                cout<< 10;
                 items[row][i] = -1;
                 stripedEffectRender(i, row, VERTICAL);
                 eatStriped(i, -1);
@@ -715,7 +707,7 @@ void Game::renderEnd(bool &endG)
     SDL_Rect star[3];
     if(!endGame.loadFromFile("imgs/endgame.png", Renderer))
     {
-        std::cout<< "Failed to load endGame texture!\n";
+        cout<< "Failed to load endGame texture!\n";
         return;
     }
     else
@@ -724,7 +716,7 @@ void Game::renderEnd(bool &endG)
     }
     if(!starScore.loadFromFile("imgs/starScore.png", Renderer))
     {
-        std::cout<< "Failed to load starScore texture!\n";
+        cout<< "Failed to load starScore texture!\n";
         return;
     }
     else
@@ -820,7 +812,7 @@ void Game::renderEnd(bool &endG)
         SDL_RenderPresent(Renderer);
     }
     else
-        std::cout << "Failed to render score texture" << endl;
+        cout << "Failed to render score texture" << endl;
 
     endG = true;
     updateHighScore(score);
@@ -855,27 +847,31 @@ void Game::play(SDL_Event* e, int x, int y, bool* restart, bool& endG, int &paus
 
 void Game::renderHint(int x, int y, int u, int v)
 {
-    LTexture hintFrame;
-    if(!hintFrame.loadFromFile("imgs/candy (24).png", Renderer))
-    {
-        std::cout<< "Failed to load hint texture!\n";
-    }
-    SDL_Rect hehe = {0, 0 , 75, 75};
-    hintFrame.render(posX[y][x], posY[y][x], Renderer, &hehe);
-    hintFrame.render(posX[v][u], posY[v][u], Renderer, &hehe);
+    SDL_Rect hehe = {250, 473 , 75, 75};
+    gAnimation.render(posX[y][x], posY[y][x], Renderer, &hehe);
+    if(x != u || y != v)
+        gAnimation.render(posX[v][u], posY[v][u], Renderer, &hehe);
 }
 void Game::hint()
 {
+    bool check = false;
     for(int i = ROW_NUMBER - 1; i >= 0; i--)
     {
         for(int j = COLUMN_NUMBER - 1; j >= 0; j--)
         {
+            if(items[i][j] >= STAR)
+            {
+                check = true;
+                renderHint(j, i, j, i);
+                return;
+            }
             if(i - 1 >= 0)
             {
                 swap(items[i][j], items[i - 1][j]);
                 if(vertical(j, i) >= 3 || vertical(j, i - 1) >= 3 ||
                    horizontal(j, i) >= 3 || horizontal(j, i - 1) >= 3)
                 {
+                    check = true;
                     swap(items[i][j], items[i - 1][j]);
                     renderHint(j, i, j, i - 1);
                     return;
@@ -889,6 +885,7 @@ void Game::hint()
                 if(vertical(j, i) >= 3 || vertical(j, i + 1) >= 3 ||
                    horizontal(j, i) >= 3 || horizontal(j, i + 1) >= 3)
                 {
+                    check = true;
                     swap(items[i][j], items[i + 1][j]);
                     renderHint(j, i, j, i + 1);
                     return;
@@ -902,6 +899,7 @@ void Game::hint()
                 if(vertical(j, i) >= 3 || vertical(j - 1, i) >= 3 ||
                    horizontal(j, i) >= 3 || horizontal(j - 1, i) >= 3)
                 {
+                    check = true;
                     swap(items[i][j], items[i][j - 1]);
                     renderHint(j, i, j - 1, i);
                     return;
@@ -909,12 +907,13 @@ void Game::hint()
                 else
                     swap(items[i][j], items[i][j - 1]);
             }
-            if(i + 1 < ROW_NUMBER)
+            if(j + 1 < COLUMN_NUMBER)
             {
                 swap(items[i][j], items[i][j + 1]);
                 if(vertical(j, i) >= 3 || vertical(j + 1, i) >= 3 ||
                    horizontal(j, i) >= 3 || horizontal(j + 1, i) >= 3)
                 {
+                    check = true;
                     swap(items[i][j], items[i][j + 1]);
                     renderHint(j, i, j + 1, i);
                     return;
@@ -924,4 +923,23 @@ void Game::hint()
             }
         }
     }
+
+    if(check == false)
+    {
+        outOfMove();
+    }
+}
+
+void Game::outOfMove()
+{
+    for(int i = 0; i < ROW_NUMBER; i++)
+    {
+        for(int j = 0; j < COLUMN_NUMBER; j++)
+        {
+            items[i][j] = newItem();
+            posX[i][j] = START_X + ITEMS_SIZE*j;
+            posY[i][j] = START_Y + ITEMS_SIZE*i;
+        }
+    }
+     while(checkInit());
 }

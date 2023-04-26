@@ -123,7 +123,7 @@ void HandleUnmuteButton(SDL_Event* e, LButton& unmute, bool& music, SDL_Rect* bu
             LTexture setting;
             if(!setting.loadFromFile("imgs/unmute.png", gRenderer))
             {
-                std::cout<< "Failed to load unmute texture!\n";
+                cout<< "Failed to load unmute texture!\n";
             }
             else
             {
@@ -143,7 +143,7 @@ void HandleMuteButton(SDL_Event* e, LButton& mute, bool& music, SDL_Rect* button
             LTexture setting;
             if(!setting.loadFromFile("imgs/mute.png", gRenderer))
             {
-                std::cout<< "Failed to load mute texture!\n";
+                cout<< "Failed to load mute texture!\n";
             }
             else
             {
