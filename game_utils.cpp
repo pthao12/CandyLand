@@ -1,42 +1,51 @@
 #include "game_utils.h"
 
-int stringToInt(string s)
+Game::Game(SDL_Renderer *gRenderer, TTF_Font *gFont)
 {
-    int num = 0;
-    for(unsigned int i = 0; i < s.length(); i++)
-    {
-        num = num*10 + int(s[i] - '0');
+    Renderer = gRenderer;
+    Font = gFont;
+}
+Game::~Game()
+{
+	score = 0;
+    startTime = 0;
+    timeLeft = 0;
+    timeHint = 0;
+    countSelected = 0;
+    left = 0;
+    right = 0;
+    above = 0;
+    below = 0;
+    drop = false;
+    sound = false;
+}
+
+void Game::play(SDL_Event* e, int x, int y, bool& restart, bool& endG, int &pauseTime){
+    if(restart){
+        if(loadImage())
+            initGame();
+        restart = false;
+        pauseTime = 0;
     }
-    return num;
-}
-int Game::newItem()
-{
-    return rand() % ITEMS_NUMBER;
-}
-bool Game::checkInit()
-{
-    bool check = false;
-    //check xem có những hàng hay cột kẹo nào triệt tiêu k
-    for(int i = 0; i < ROW_NUMBER; i++)
-    {
-        for(int j = 0; j < COLUMN_NUMBER; j++)
+    if(restart == false){
+        timeLeft = timeGame - ((std::clock() - startTime - pauseTime) / (double)CLOCKS_PER_SEC);
+        if(timeLeft <= 0)
         {
-            while(j + 2 < COLUMN_NUMBER && items[i][j] == items[i][j + 1] && items[i][j] == items[i][j + 2])
-            {
-                items[i][j + 1] = newItem();
-                items[i][j + 2] = newItem();
-                check = true;
-            }
-            while(i + 2 < ROW_NUMBER && items[i][j] == items[i + 1][j] && items[i][j] == items[i + 2][j])
-            {
-                items[i + 1][j] = newItem();
-                items[i + 2][j] = newItem();
-                check = true;
-            }
+            restart = true;
+            renderEnd(endG);
+            return;
         }
+        if( e->type == SDL_MOUSEBUTTONDOWN )
+        {
+            updateTouch(x, y);
+            timeHint = timeLeft;
+            sound = true;
+        }
+        updateGame();
     }
-    return check;
+    render();
 }
+
 bool Game::loadImage()
 {
     bool success = true;
@@ -106,6 +115,34 @@ bool Game::loadImage()
      }
     return success;
 }
+int Game::newItem()
+{
+    return rand() % ITEMS_NUMBER;
+}
+bool Game::checkInit()
+{
+    bool check = false;
+    for(int i = 0; i < ROW_NUMBER; i++)
+    {
+        for(int j = 0; j < COLUMN_NUMBER; j++)
+        {
+            while(j + 2 < COLUMN_NUMBER && items[i][j] == items[i][j + 1] && items[i][j] == items[i][j + 2])
+            {
+                items[i][j + 1] = newItem();
+                items[i][j + 2] = newItem();
+                check = true;
+            }
+            while(i + 2 < ROW_NUMBER && items[i][j] == items[i + 1][j] && items[i][j] == items[i + 2][j])
+            {
+                items[i + 1][j] = newItem();
+                items[i + 2][j] = newItem();
+                check = true;
+            }
+        }
+    }
+    return check;
+}
+
 void Game::initGame()
 {
     //khởi tạo hình cho các viên kẹo
@@ -127,24 +164,178 @@ void Game::initGame()
     timeLeft = timeGame;
     startTime = std::clock();
 }
-void Game::getHighScore()
+
+void Game::renderCandy()
 {
-    fstream HighScoreFile ("HighScore.txt");
-    if(HighScoreFile.is_open())
+    for(int i = 0; i < ROW_NUMBER; i++)
     {
-        HighScoreFile >> oldHighScore;
-        HighScoreFile.close();
+        for(int j = 0; j < COLUMN_NUMBER; j++)
+        {
+            if(posY[i][j] >= START_Y)
+               gCandy.render(posX[i][j], posY[i][j], Renderer, &candy[items[i][j]]);
+        }
     }
 }
-void Game::updateHighScore(int score)
+
+void Game::renderClock()
 {
-    ofstream HighScoreFile ("HighScore.txt");
-    if(score > stringToInt(oldHighScore))
-    {
-        HighScoreFile << to_string(score);
-        HighScoreFile.close();
-    }
+    gClock.render(CLOCK_X, CLOCK_Y, Renderer, &clock[timeLeft% 20]);
 }
+
+void Game::renderDrop(int timeDrop)
+{
+    drop = true;
+    while(timeDrop)
+    {
+        for(int i = 0; i < ROW_NUMBER; i++)
+            for(int j = 0; j < COLUMN_NUMBER; j++)
+                if(posY[i][j] != (START_Y + i*ITEMS_SIZE))
+                {
+                    posY[i][j] += SPEED;
+                }
+        render();
+        timeDrop --;
+    }
+    loadChunk("sound/drop.wav");
+    drop = false;
+}
+
+void Game::renderChoose()
+{
+    int x, y;
+    SDL_GetMouseState( &x, &y );
+    x = ceil((x - START_X)/ITEMS_SIZE)*ITEMS_SIZE + START_X;
+    y = ceil((y - START_Y)/ITEMS_SIZE)*ITEMS_SIZE + START_Y;
+    if(x >= START_X && x <= START_X + COLUMN_NUMBER*ITEMS_SIZE &&
+       y >= START_Y && y <= START_Y + ROW_NUMBER*ITEMS_SIZE)
+       choose.render(x, y, Renderer);
+}
+
+void Game::renderEnd(bool &endG)
+{
+    LTexture starScore;
+    LTexture endGame;
+    SDL_Rect star[3];
+    if(!endGame.loadFromFile("imgs/endgame.png", Renderer))
+    {
+        cout<< "Failed to load endGame texture!\n";
+        return;
+    }
+    else
+    {
+        endGame.render(0, 0, Renderer);
+    }
+    if(!starScore.loadFromFile("imgs/starScore.png", Renderer))
+    {
+        cout<< "Failed to load starScore texture!\n";
+        return;
+    }
+    else
+    {
+        star[0] = {0, 0, 45, 45};
+        star[1] = {102, 0, 74, 74};
+        star[2] = {270, 0, 110, 110};
+        /*star[0].x = 0;
+        star[0].y = 0;
+        star[0].w = 45;
+        star[0].h = 45;
+
+        star[1].x = 102;
+        star[1].y = 0;
+        star[1].w = 74;
+        star[1].h = 74;
+
+        star[2].x = 270;
+        star[2].y = 0;
+        star[2].w = 110;
+        star[2].h = 110;
+        */
+    }
+    int numberStar = min(score/150, 3);
+    int desX[3];
+    int desY[3];
+
+    desX[0] = 702;
+    desX[1] = 688;
+    desX[2] = 670;
+
+    desY[0] = 314;
+    desY[1] = 300;
+    desY[2] = 282;
+    if( numberStar == 0)
+    {
+        SDL_RenderPresent(Renderer);
+    }
+    if( numberStar >= 1 )
+    {
+        for(int i = 0; i < 3; i++)
+        {
+            starScore.render(desX[i], desY[i], Renderer, &star[i]);
+            SDL_RenderPresent(Renderer);
+            SDL_Delay(250);
+        }
+    }
+    if( numberStar >= 2 )
+    {
+        for(int i = 0; i < 3; i++)
+        {
+            starScore.render(desX[i], desY[i], Renderer, &star[i]);
+            SDL_RenderPresent(Renderer);
+            SDL_Delay(250);
+        }
+    }
+    if( numberStar >= 3 )
+    {
+
+        for(int i = 0; i < 3; i++)
+        {
+            starScore.render(desX[i], desY[i], Renderer, &star[i]);
+            SDL_RenderPresent(Renderer);
+            SDL_Delay(250);
+        }
+    }
+
+    string text;
+    text = "SCORE : " + to_string(score);
+    SDL_Color textColor = {0xFF, 0xFF, 0xFF};
+
+    if(gTextTexture.loadFromRenderedText(text, Font, textColor, Renderer))
+    {
+        gTextTexture.render(450, 430, Renderer);
+        SDL_RenderPresent(Renderer);
+    }
+    else
+        cout << "Failed to render score texture" << endl;
+
+    endG = true;
+    return;
+}
+
+void Game::renderHint(int x, int y, int u, int v)
+{
+    if(timeHint - timeLeft < 5)
+        return;
+    else if(timeHint - timeLeft == 5 && sound)
+    {
+        sound = false;
+        loadChunk("sound/hint.wav");
+    }
+    SDL_Rect hehe = {250, 473 , 75, 75};
+    gAnimation.render(posX[y][x], posY[y][x], Renderer, &hehe);
+    if(x != u || y != v)
+        gAnimation.render(posX[v][u], posY[v][u], Renderer, &hehe);
+}
+
+int stringToInt(string s)
+{
+    int num = 0;
+    for(unsigned int i = 0; i < s.length(); i++)
+    {
+        num = num*10 + int(s[i] - '0');
+    }
+    return num;
+}
+
 void Game::printScoreAndTime()
 {
     string text;
@@ -231,34 +422,12 @@ void Game::stripedEffectRender(int x, int y, int status)
     }
 }
 
-void Game::renderChoose()
-{
-    int x, y;
-    SDL_GetMouseState( &x, &y );
-    x = ceil((x - START_X)/ITEMS_SIZE)*ITEMS_SIZE + START_X;
-    y = ceil((y - START_Y)/ITEMS_SIZE)*ITEMS_SIZE + START_Y;
-    if(x >= START_X && x <= START_X + COLUMN_NUMBER*ITEMS_SIZE &&
-       y >= START_Y && y <= START_Y + ROW_NUMBER*ITEMS_SIZE)
-       choose.render(x, y, Renderer);
-}
-
-void Game::renderCandy()
-{
-    for(int i = 0; i < ROW_NUMBER; i++)
-    {
-        for(int j = 0; j < COLUMN_NUMBER; j++)
-        {
-            if(posY[i][j] >= START_Y)
-               gCandy.render(posX[i][j], posY[i][j], Renderer, &candy[items[i][j]]);
-        }
-    }
-}
 void Game::render()
 {
     SDL_SetRenderDrawColor(Renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     SDL_RenderClear(Renderer);
     backGround.render(0,0, Renderer);
-    gClock.render(CLOCK_X, CLOCK_Y, Renderer, &clock[timeLeft% 20]);
+    renderClock();
     renderCandy();
     renderChoose();
     printScoreAndTime();
@@ -266,241 +435,7 @@ void Game::render()
         hint();
     SDL_RenderPresent(Renderer);
 }
-void Game::updateTouch(int mouseX, int mouseY)
-{
-    //vị trí của chuột ở cột và hàng nào
-    int col = (mouseX - START_X)/ITEMS_SIZE;
-    int row = (mouseY - START_Y)/ITEMS_SIZE;
-    if (row < 0 || col < 0 || row >= ROW_NUMBER || col >= COLUMN_NUMBER)
-        return;
-    if(countSelected == 1)
-    {
-        //SDL_RenderPresent(Renderer);
-        if((row == selected[0].y - 1 && col == selected[0].x) ||
-               (row == selected[0].y+1 && col == selected[0].x) ||
-               (row == selected[0].y && col == selected[0].x -1) ||
-               (row == selected[0].y && col == selected[0].x +1))
-            {
-                selected[1].y = row;
-                selected[1].x = col;
-                countSelected = 2;
-                return;
-            }
-        else
-            countSelected = 0;
-    }
-    else
-    {
-        selected[0].y = row;
-        selected[0].x = col;
-        countSelected = 1;
-    }
-}
 
-void Game::swapItems(int x, int y, int u, int v)
-{
-    // đặt lại tên biến cho 5
-    for(int i = 0; i < 15; i++)
-    {
-        posX[y][x] += (u - x)*ITEMS_SIZE/15;
-        posY[y][x] += (v - y)*ITEMS_SIZE/15;
-        posX[v][u] += (x - u)*ITEMS_SIZE/15;
-        posY[v][u] += (y - v)*ITEMS_SIZE/15;
-        render();
-    }
-    if(x != u)
-        swap(posX[y][x], posX[v][u]);
-    if(y != v)
-        swap(posY[y][x], posY[v][u]);
-    swap(items[y][x],items[v][u]);
-    //render();
-}
-void Game::renderDrop(int timeDrop)
-{
-    drop = true;
-    while(timeDrop)
-    {
-        for(int i = 0; i < ROW_NUMBER; i++)
-            for(int j = 0; j < COLUMN_NUMBER; j++)
-                if(posY[i][j] != (START_Y + i*ITEMS_SIZE))
-                {
-                    posY[i][j] += SPEED;
-                }
-        render();
-        timeDrop --;
-    }
-    drop = false;
-}
-void Game::decreaseRow()
-{
-    int c1, r1, r2;
-    for(c1 = 0; c1 < COLUMN_NUMBER; c1++)
-    {
-        r1 = ROW_NUMBER - 1;
-        while(r1 > 0)
-        {
-            while(r1 >= 0 && items[r1][c1] != -1)
-                r1--;
-            r2 = r1-1;
-            while(r2 >= 0 && items[r2][c1] == -1)
-                r2--;
-            if(r2 < 0)
-                break;
-            swap(items[r1][c1], items[r2][c1]);
-            posY[r1][c1] = posY[r2][c1];
-        }
-    }
-    int timeDrop = 0;
-    for(c1 = COLUMN_NUMBER - 1; c1 >= 0; c1--)
-    {
-        r2 = -1;
-        for(r1 = ROW_NUMBER - 1; r1 >= 0; r1--)
-        {
-            if(items[r1][c1] == -1)
-            {
-                if(r2 == -1 && items[r1][c1] == -1)
-                    r2 = ITEMS_SIZE;
-                else if(items[r1][c1] == -1)
-                    r2 += ITEMS_SIZE;
-                timeDrop = max(timeDrop, r2/SPEED);
-                posY[r1][c1] = START_Y - r2;
-                items[r1][c1] = newItem();
-            }
-        }
-        score += r2/ITEMS_SIZE;
-    }
-    if(timeDrop == 0)
-        return;
-    renderDrop(timeDrop);
-}
-bool Game::checkClear()
-{
-    for(int i = ROW_NUMBER - 1; i >= 0; i--)
-    {
-        for(int j = COLUMN_NUMBER - 1; j >= 0; j--)
-        {
-            if(horizontal(j, i) + vertical(j, i) != 0)
-            {
-                items[i][j] = eatCandy(j, i);
-                if(items[i][j] >= 6 || items[i][j] == -1)
-                {
-                    decreaseRow();
-                    return false;
-                }
-            }
-            else if(items[i][j] == -1)
-            {
-                decreaseRow();
-                return false;
-            }
-        }
-    }
-    return true;
-}
-void Game::updateBoard()
-{
-    while(!checkClear());
-}
-void Game::updateGame()
-{
-    int x = selected[0].x,
-        y = selected[0].y,
-        u = selected[1].x,
-        v = selected[1].y;
-    if(countSelected == 2 && (abs(x-u) + abs(y-v)) != 1)
-    {
-        countSelected = 0;
-        selected[0].x = 0;
-        selected[0].y = 0;
-        selected[1].x = 0;
-        selected[1].y = 0;
-        return;
-    }
-    if(items[y][x] == BOMB)
-    {
-        items[y][x] = -1;
-        eatBomb(x, y);
-        updateBoard();
-        countSelected = 0;
-        selected[0].x = 0;
-        selected[0].y = 0;
-        selected[1].x = 0;
-        selected[1].y = 0;
-        return;
-    }
-    else if(countSelected == 2)
-    {
-        if(items[v][u] == BOMB)
-        {
-            items[v][u] = -1;
-            eatBomb(u, v);
-            updateBoard();
-            countSelected = 0;
-            selected[0].x = 0;
-            selected[0].y = 0;
-            selected[1].x = 0;
-            selected[1].y = 0;
-            return;
-        }
-        swapItems(x, y, u, v);
-        if(items[y][x] == STAR && items[v][u] <= STAR)
-        {
-            items[y][x] = -1;
-            eatStar(items[v][u]);
-        }
-        else if(items[v][u] == STAR && items[y][x] <= STAR)
-        {
-            items[v][u] = -1;
-            eatStar(items[y][x]);
-        }
-        else if(items[y][x] == STRIPED)
-        {
-            if(x == u)
-            {
-                items[y][x] = -1;
-                stripedEffectRender(x, y, VERTICAL);
-                eatStriped(x, -1);
-            }
-            else if(y == v)
-            {
-                items[y][x] = -1;
-                stripedEffectRender(x, y, HORIZONTAL);
-                eatStriped(-1, y);
-            }
-        }
-        else if(items[v][u] == STRIPED)
-        {
-            if(x == u)
-            {
-                items[v][u] = -1;
-                stripedEffectRender(u, v, VERTICAL);
-                eatStriped(u, -1);
-            }
-            else if(y == v)
-            {
-                items[v][u] = -1;
-                stripedEffectRender(u, v, HORIZONTAL);
-                eatStriped(-1, v);
-            }
-        }
-        else if(horizontal(x, y) + vertical(x, y) + horizontal(u, v) + vertical(u, v) == 0)
-            swapItems(x, y, u, v);
-        else
-        {
-            int xy = eatCandy(x, y);
-            int uv = eatCandy(u, v);
-            items[y][x] = xy;
-            items[v][u] = uv;
-            decreaseRow();
-        }
-        updateBoard();
-        countSelected = 0;
-        selected[0].x = 0;
-        selected[0].y = 0;
-        selected[1].x = 0;
-        selected[1].y = 0;
-    }
-}
 int Game::horizontal(int x, int y)
 {
     left = x;
@@ -605,8 +540,10 @@ int Game::eatCandy(int x, int y)
 void Game::eatStar(int type)
 {
     loadChunk("sound/star_created.wav");
-    if(type >= 0 && type <= 5)
+    if(type != STAR)
     {
+        if(type > STAR)
+            type = newItem();
         for(int i = 0; i < ROW_NUMBER; i++)
         {
             for(int j = 0; j < COLUMN_NUMBER; j++)
@@ -710,166 +647,241 @@ void Game::eatStriped(int col, int row)
         }
     }
 }
-void Game::renderEnd(bool &endG)
+
+void Game::updateTouch(int mouseX, int mouseY)
 {
-    LTexture starScore;
-    LTexture endGame;
-    SDL_Rect star[3];
-    if(!endGame.loadFromFile("imgs/endgame.png", Renderer))
-    {
-        cout<< "Failed to load endGame texture!\n";
+    int col = (mouseX - START_X)/ITEMS_SIZE;
+    int row = (mouseY - START_Y)/ITEMS_SIZE;
+    if (row < 0 || col < 0 || row >= ROW_NUMBER || col >= COLUMN_NUMBER)
         return;
+    if(countSelected == 1)
+    {
+        if((row == selected[0].y - 1 && col == selected[0].x) ||
+               (row == selected[0].y+1 && col == selected[0].x) ||
+               (row == selected[0].y && col == selected[0].x -1) ||
+               (row == selected[0].y && col == selected[0].x +1))
+            {
+                selected[1].y = row;
+                selected[1].x = col;
+                countSelected = 2;
+                return;
+            }
+        else
+            countSelected = 0;
     }
     else
     {
-        endGame.render(0, 0, Renderer);
+        selected[0].y = row;
+        selected[0].x = col;
+        countSelected = 1;
     }
-    if(!starScore.loadFromFile("imgs/starScore.png", Renderer))
-    {
-        cout<< "Failed to load starScore texture!\n";
-        return;
-    }
-    else
-    {
-        star[0].x = 0;
-        star[0].y = 0;
-        star[0].w = 45;
-        star[0].h = 45;
-
-        star[1].x = 102;
-        star[1].y = 0;
-        star[1].w = 74;
-        star[1].h = 74;
-
-        star[2].x = 270;
-        star[2].y = 0;
-        star[2].w = 110;
-        star[2].h = 110;
-    }
-    int numberStar = min(score/150, 3);
-    if( numberStar == 0)
-    {
-        SDL_RenderPresent(Renderer);
-    }
-    if( numberStar >= 1 )
-    {
-        int desX[3];
-        int desY[3];
-
-        desX[0] = 462;
-        desX[1] = 448;
-        desX[2] = 430;
-
-        desY[0] = 314;
-        desY[1] = 300;
-        desY[2] = 282;
-
-        for(int i = 0; i < 3; i++)
-        {
-            starScore.render(desX[i], desY[i], Renderer, &star[i]);
-            SDL_RenderPresent(Renderer);
-            SDL_Delay(250);
-        }
-    }
-    if( numberStar >= 2 )
-    {
-        int desX[3];
-        int desY[3];
-
-        desX[0] = 582;
-        desX[1] = 568;
-        desX[2] = 550;
-
-        desY[0] = 314;
-        desY[1] = 300;
-        desY[2] = 282;
-
-        for(int i = 0; i < 3; i++)
-        {
-            starScore.render(desX[i], desY[i], Renderer, &star[i]);
-            SDL_RenderPresent(Renderer);
-            SDL_Delay(250);
-        }
-    }
-    if( numberStar >= 3 )
-    {
-        int desX[3];
-        int desY[3];
-
-        desX[0] = 702;
-        desX[1] = 688;
-        desX[2] = 670;
-
-        desY[0] = 314;
-        desY[1] = 300;
-        desY[2] = 282;
-
-        for(int i = 0; i < 3; i++)
-        {
-            starScore.render(desX[i], desY[i], Renderer, &star[i]);
-            SDL_RenderPresent(Renderer);
-            SDL_Delay(250);
-        }
-    }
-
-    string text;
-    text = "SCORE : " + to_string(score);
-    SDL_Color textColor = {0xFF, 0xFF, 0xFF};
-
-    if(gTextTexture.loadFromRenderedText(text, Font, textColor, Renderer))
-    {
-        gTextTexture.render(450, 430, Renderer);
-        SDL_RenderPresent(Renderer);
-    }
-    else
-        cout << "Failed to render score texture" << endl;
-
-    endG = true;
-    updateHighScore(score);
-    endGame.free();
-    starScore.free();
-    return;
 }
-
-void Game::play(SDL_Event* e, int x, int y, bool* restart, bool& endG, int &pauseTime){
-    if(*restart){
-        if(loadImage())
-            initGame();
-        *restart = false;
-        pauseTime = 0;
+void Game::updateBoard()
+{
+    while(!checkClear());
+}
+void Game::updateGame()
+{
+    int x = selected[0].x,
+        y = selected[0].y,
+        u = selected[1].x,
+        v = selected[1].y;
+    if(countSelected == 2 && (abs(x-u) + abs(y-v)) != 1)
+    {
+        countSelected = 0;
+        selected[0].x = 0;
+        selected[0].y = 0;
+        selected[1].x = 0;
+        selected[1].y = 0;
+        return;
     }
-    if(*restart == false){
-        timeLeft = timeGame - ((std::clock() - startTime - pauseTime) / (double)CLOCKS_PER_SEC);
-        if(timeLeft <= 0)
+    if(items[y][x] == BOMB)
+    {
+        items[y][x] = -1;
+        eatBomb(x, y);
+        updateBoard();
+        countSelected = 0;
+        selected[0].x = 0;
+        selected[0].y = 0;
+        selected[1].x = 0;
+        selected[1].y = 0;
+        return;
+    }
+    else if(countSelected == 2)
+    {
+        if(items[v][u] == BOMB)
         {
-            *restart = true;
-            renderEnd(endG);
+            items[v][u] = -1;
+            eatBomb(u, v);
+            updateBoard();
+            countSelected = 0;
+            selected[0].x = 0;
+            selected[0].y = 0;
+            selected[1].x = 0;
+            selected[1].y = 0;
             return;
         }
-        if( e->type == SDL_MOUSEBUTTONDOWN )
+        swapItems(x, y, u, v);
+        if(items[y][x] == STAR)
         {
-            updateTouch(x, y);
-            timeHint = timeLeft;
-            sound = true;
+            items[y][x] = -1;
+            eatStar(items[v][u]);
         }
-        updateGame();
+        else if(items[v][u] == STAR)
+        {
+            items[v][u] = -1;
+            eatStar(items[y][x]);
+        }
+        else if(items[y][x] == STRIPED)
+        {
+            if(x == u)
+            {
+                items[y][x] = -1;
+                stripedEffectRender(x, y, VERTICAL);
+                eatStriped(x, -1);
+            }
+            else if(y == v)
+            {
+                items[y][x] = -1;
+                stripedEffectRender(x, y, HORIZONTAL);
+                eatStriped(-1, y);
+            }
+        }
+        else if(items[v][u] == STRIPED)
+        {
+            if(x == u)
+            {
+                items[v][u] = -1;
+                stripedEffectRender(u, v, VERTICAL);
+                eatStriped(u, -1);
+            }
+            else if(y == v)
+            {
+                items[v][u] = -1;
+                stripedEffectRender(u, v, HORIZONTAL);
+                eatStriped(-1, v);
+            }
+        }
+        else if(horizontal(x, y) + vertical(x, y) + horizontal(u, v) + vertical(u, v) == 0)
+            swapItems(x, y, u, v);
+        else
+        {
+            int xy = eatCandy(x, y);
+            int uv = eatCandy(u, v);
+            items[y][x] = xy;
+            items[v][u] = uv;
+            decreaseRow();
+        }
+        updateBoard();
+        countSelected = 0;
+        selected[0].x = 0;
+        selected[0].y = 0;
+        selected[1].x = 0;
+        selected[1].y = 0;
     }
-    render();
+}
+void Game::getHighScore()
+{
+    fstream HighScoreFile ("HighScore.txt");
+    if(HighScoreFile.is_open())
+    {
+        HighScoreFile >> oldHighScore;
+        HighScoreFile.close();
+    }
 }
 
-void Game::renderHint(int x, int y, int u, int v)
+void Game::updateHighScore()
 {
-    if(timeHint - timeLeft < 5)
-        return;
-    else if(timeHint - timeLeft == 5 && sound)
+    ofstream HighScoreFile ("HighScore.txt");
+    if(score > stringToInt(oldHighScore))
     {
-        sound = false;
-        loadChunk("sound/hint.wav");
+        HighScoreFile << to_string(score);
+        HighScoreFile.close();
     }
-    SDL_Rect hehe = {250, 473 , 75, 75};
-    gAnimation.render(posX[y][x], posY[y][x], Renderer, &hehe);
-    if(x != u || y != v)
-        gAnimation.render(posX[v][u], posY[v][u], Renderer, &hehe);
+}
+
+void Game::swapItems(int x, int y, int u, int v)
+{
+    for(int i = 0; i < 15; i++)
+    {
+        posX[y][x] += (u - x)*ITEMS_SIZE/15;
+        posY[y][x] += (v - y)*ITEMS_SIZE/15;
+        posX[v][u] += (x - u)*ITEMS_SIZE/15;
+        posY[v][u] += (y - v)*ITEMS_SIZE/15;
+        render();
+    }
+    if(x != u)
+        swap(posX[y][x], posX[v][u]);
+    if(y != v)
+        swap(posY[y][x], posY[v][u]);
+    swap(items[y][x],items[v][u]);
+}
+
+void Game::decreaseRow()
+{
+    int c1, r1, r2;
+    for(c1 = 0; c1 < COLUMN_NUMBER; c1++)
+    {
+        r1 = ROW_NUMBER - 1;
+        while(r1 > 0)
+        {
+            while(r1 >= 0 && items[r1][c1] != -1)
+                r1--;
+            r2 = r1-1;
+            while(r2 >= 0 && items[r2][c1] == -1)
+                r2--;
+            if(r2 < 0)
+                break;
+            swap(items[r1][c1], items[r2][c1]);
+            posY[r1][c1] = posY[r2][c1];
+        }
+    }
+    int timeDrop = 0;
+    for(c1 = COLUMN_NUMBER - 1; c1 >= 0; c1--)
+    {
+        r2 = -1;
+        for(r1 = ROW_NUMBER - 1; r1 >= 0; r1--)
+        {
+            if(items[r1][c1] == -1)
+            {
+                if(r2 == -1 && items[r1][c1] == -1)
+                    r2 = ITEMS_SIZE;
+                else if(items[r1][c1] == -1)
+                    r2 += ITEMS_SIZE;
+                timeDrop = max(timeDrop, r2/SPEED);
+                posY[r1][c1] = START_Y - r2;
+                items[r1][c1] = newItem();
+            }
+        }
+        score += r2/ITEMS_SIZE;
+    }
+    if(timeDrop == 0)
+        return;
+    renderDrop(timeDrop);
+}
+bool Game::checkClear()
+{
+    for(int i = ROW_NUMBER - 1; i >= 0; i--)
+    {
+        for(int j = COLUMN_NUMBER - 1; j >= 0; j--)
+        {
+            if(horizontal(j, i) + vertical(j, i) != 0)
+            {
+                items[i][j] = eatCandy(j, i);
+                if(items[i][j] >= 6 || items[i][j] == -1)
+                {
+                    decreaseRow();
+                    return false;
+                }
+            }
+            else if(items[i][j] == -1)
+            {
+                decreaseRow();
+                return false;
+            }
+        }
+    }
+    return true;
 }
 void Game::hint()
 {

@@ -113,7 +113,7 @@ bool loadMedia()
         sizeofButton.h = 79;
     }
 
-    gMusic = Mix_LoadMUS("sound/Oneul - (Strawberry Dance) 🍓.mp3");
+    gMusic = Mix_LoadMUS("sound/ưng quá chừng.mp3");
     if( gMusic == NULL )
 	{
 		std::cout<< "Failed to load beat music! SDL_mixer Error: " << Mix_GetError() <<endl;
@@ -176,6 +176,7 @@ void run()
                 }
                 if(e.type == SDL_QUIT)
                 {
+                    hehe.updateHighScore();
                     quit = true;
                 }
                 if(!played){
@@ -234,7 +235,7 @@ void run()
                         {
                             int x, y;
                             SDL_GetMouseState( &x, &y);
-                            hehe.play(&e, x, y, &restart, endG, pauseTime);
+                            hehe.play(&e, x, y, restart, endG, pauseTime);
                         }
                     }
                 }

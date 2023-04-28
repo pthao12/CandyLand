@@ -47,52 +47,47 @@ class Game{
         int countSelected = 0;
         int left = 0, right = 0, above = 0, below = 0;
         string oldHighScore;
-        int newItem();
         bool drop = false;
         bool sound = false;
 
     public:
-        Game(SDL_Renderer *gRenderer, TTF_Font *gFont)
-        {
-            Renderer = gRenderer;
-            Font = gFont;
-        }
-
-        void play(SDL_Event* e, int x, int y, bool* restart, bool& endG, int& pauseTime);
+        Game(SDL_Renderer *gRenderer, TTF_Font *gFont);
+        ~Game();
+        void play(SDL_Event* e, int x, int y, bool& restart, bool& endG, int& pauseTime);
 
         bool loadImage();
+        int newItem();
         bool checkInit();
         void initGame();
-        void render();
 
         void renderCandy();
-        void printScoreAndTime();
         void renderClock();
         void renderDrop(int timeDrop);
-        void renderScore();
         void renderChoose();
         void renderEnd(bool &endG);
         void renderHint(int x, int y, int u, int v);
+        void printScoreAndTime();
         void bombEffectRender(int x, int y);
         void stripedEffectRender(int x, int y, int status);
-
-        void updateGame();
-        void updateTouch(int mouseX, int mouseY);
-        void swapItems(int x, int y, int u, int v);
-        void updateBoard();
-        void updateHighScore(int score);
-        void outOfMove();
-        bool checkClear();
-        void decreaseRow();
-        void hint();
-        void getHighScore();
+        void render();
 
         int horizontal(int x, int y);
         int vertical(int x, int y);
         int eatCandy(int x, int y);
-        void eatBomb(int x, int y);
         void eatStar(int type);
+        void eatBomb(int x, int y);
         void eatStriped(int col, int row);
+
+        void updateTouch(int mouseX, int mouseY);
+        void updateBoard();
+        void updateGame();
+        void getHighScore();
+        void updateHighScore();
+        void swapItems(int x, int y, int u, int v);
+        void decreaseRow();
+        bool checkClear();
+        void hint();
+        void outOfMove();
 
 };
 #endif

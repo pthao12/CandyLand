@@ -150,7 +150,6 @@ void HandleUnmuteButton(SDL_Event* e, LButton& unmute, bool& music, SDL_Rect* bu
                 setting.render(0, 0, gRenderer);
                 SDL_RenderPresent(gRenderer);
             }
-            setting.free();
         }
 }
 
@@ -171,7 +170,6 @@ void HandleMuteButton(SDL_Event* e, LButton& mute, bool& music, SDL_Rect* button
                 setting.render(0, 0, gRenderer);
                 SDL_RenderPresent(gRenderer);
             }
-            setting.free();
         }
 
 }
