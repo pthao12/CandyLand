@@ -185,6 +185,7 @@ void Game::printScoreAndTime()
 
 void Game::bombEffectRender(int x, int y)
 {
+    loadChunk("sound/bomb_sound.wav");
     for(int i = 0; i < 2; i++)
         for(int j = 0; j < 4; j++)
         {
@@ -197,6 +198,7 @@ void Game::bombEffectRender(int x, int y)
 
 void Game::stripedEffectRender(int x, int y, int status)
 {
+    loadChunk("sound/striped_created.wav");
     if(status == HORIZONTAL)
     {
         int k = 0;
@@ -239,12 +241,9 @@ void Game::renderChoose()
        y >= START_Y && y <= START_Y + ROW_NUMBER*ITEMS_SIZE)
        choose.render(x, y, Renderer);
 }
-void Game::render()
+
+void Game::renderCandy()
 {
-    SDL_SetRenderDrawColor(Renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    SDL_RenderClear(Renderer);
-    backGround.render(0,0, Renderer);
-    gClock.render(CLOCK_X, CLOCK_Y, Renderer, &clock[timeLeft% 20]);
     for(int i = 0; i < ROW_NUMBER; i++)
     {
         for(int j = 0; j < COLUMN_NUMBER; j++)
@@ -253,6 +252,14 @@ void Game::render()
                gCandy.render(posX[i][j], posY[i][j], Renderer, &candy[items[i][j]]);
         }
     }
+}
+void Game::render()
+{
+    SDL_SetRenderDrawColor(Renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_RenderClear(Renderer);
+    backGround.render(0,0, Renderer);
+    gClock.render(CLOCK_X, CLOCK_Y, Renderer, &clock[timeLeft% 20]);
+    renderCandy();
     renderChoose();
     printScoreAndTime();
     if(!drop)
@@ -269,13 +276,13 @@ void Game::updateTouch(int mouseX, int mouseY)
     if(countSelected == 1)
     {
         //SDL_RenderPresent(Renderer);
-        if((row == selected[0].fi - 1 && col == selected[0].se) ||
-               (row == selected[0].fi+1 && col == selected[0].se) ||
-               (row == selected[0].fi && col == selected[0].se -1) ||
-               (row == selected[0].fi && col == selected[0].se +1))
+        if((row == selected[0].y - 1 && col == selected[0].x) ||
+               (row == selected[0].y+1 && col == selected[0].x) ||
+               (row == selected[0].y && col == selected[0].x -1) ||
+               (row == selected[0].y && col == selected[0].x +1))
             {
-                selected[1].fi = row;
-                selected[1].se = col;
+                selected[1].y = row;
+                selected[1].x = col;
                 countSelected = 2;
                 return;
             }
@@ -284,8 +291,8 @@ void Game::updateTouch(int mouseX, int mouseY)
     }
     else
     {
-        selected[0].fi = row;
-        selected[0].se = col;
+        selected[0].y = row;
+        selected[0].x = col;
         countSelected = 1;
     }
 }
@@ -306,7 +313,7 @@ void Game::swapItems(int x, int y, int u, int v)
     if(y != v)
         swap(posY[y][x], posY[v][u]);
     swap(items[y][x],items[v][u]);
-    render();
+    //render();
 }
 void Game::renderDrop(int timeDrop)
 {
@@ -396,17 +403,17 @@ void Game::updateBoard()
 }
 void Game::updateGame()
 {
-    int x = selected[0].se,
-        y = selected[0].fi,
-        u = selected[1].se,
-        v = selected[1].fi;
+    int x = selected[0].x,
+        y = selected[0].y,
+        u = selected[1].x,
+        v = selected[1].y;
     if(countSelected == 2 && (abs(x-u) + abs(y-v)) != 1)
     {
         countSelected = 0;
-        selected[0].se = 0;
-        selected[0].fi = 0;
-        selected[1].se = 0;
-        selected[1].fi = 0;
+        selected[0].x = 0;
+        selected[0].y = 0;
+        selected[1].x = 0;
+        selected[1].y = 0;
         return;
     }
     if(items[y][x] == BOMB)
@@ -415,10 +422,10 @@ void Game::updateGame()
         eatBomb(x, y);
         updateBoard();
         countSelected = 0;
-        selected[0].se = 0;
-        selected[0].fi = 0;
-        selected[1].se = 0;
-        selected[1].fi = 0;
+        selected[0].x = 0;
+        selected[0].y = 0;
+        selected[1].x = 0;
+        selected[1].y = 0;
         return;
     }
     else if(countSelected == 2)
@@ -429,10 +436,10 @@ void Game::updateGame()
             eatBomb(u, v);
             updateBoard();
             countSelected = 0;
-            selected[0].se = 0;
-            selected[0].fi = 0;
-            selected[1].se = 0;
-            selected[1].fi = 0;
+            selected[0].x = 0;
+            selected[0].y = 0;
+            selected[1].x = 0;
+            selected[1].y = 0;
             return;
         }
         swapItems(x, y, u, v);
@@ -488,17 +495,18 @@ void Game::updateGame()
         }
         updateBoard();
         countSelected = 0;
-        selected[0].se = 0;
-        selected[0].fi = 0;
-        selected[1].se = 0;
-        selected[1].fi = 0;
+        selected[0].x = 0;
+        selected[0].y = 0;
+        selected[1].x = 0;
+        selected[1].y = 0;
     }
 }
 int Game::horizontal(int x, int y)
 {
     left = x;
     right = x;
-    if(items[y][x] == -1 || items[y][x] >= 6 ) return 0;
+    if(items[y][x] == -1 || items[y][x] >= 6 )
+        return 0;
     for(left; left > 0 && items[y][x] == items[y][left - 1] ; left--);
     for(right; right < COLUMN_NUMBER - 1 && items[y][x] == items[y][right + 1]; right++);
     if(right - left + 1 >= 3)
@@ -511,7 +519,8 @@ int Game::vertical(int x, int y)
 {
     above = y;
     below = y;
-    if(items[y][x] == -1 || items[y][x] >= 6 ) return 0;
+    if(items[y][x] == -1 || items[y][x] >= 6 )
+        return 0;
     for(above; above > 0 && items[y][x] == items[above - 1][x] ; above--);
     for(below; below < ROW_NUMBER - 1 && items[y][x] == items[below + 1][x]; below++);
     if(below - above + 1 >= 3)
@@ -595,6 +604,7 @@ int Game::eatCandy(int x, int y)
 }
 void Game::eatStar(int type)
 {
+    loadChunk("sound/star_created.wav");
     if(type >= 0 && type <= 5)
     {
         for(int i = 0; i < ROW_NUMBER; i++)
@@ -839,6 +849,8 @@ void Game::play(SDL_Event* e, int x, int y, bool* restart, bool& endG, int &paus
         if( e->type == SDL_MOUSEBUTTONDOWN )
         {
             updateTouch(x, y);
+            timeHint = timeLeft;
+            sound = true;
         }
         updateGame();
     }
@@ -847,6 +859,13 @@ void Game::play(SDL_Event* e, int x, int y, bool* restart, bool& endG, int &paus
 
 void Game::renderHint(int x, int y, int u, int v)
 {
+    if(timeHint - timeLeft < 5)
+        return;
+    else if(timeHint - timeLeft == 5 && sound)
+    {
+        sound = false;
+        loadChunk("sound/hint.wav");
+    }
     SDL_Rect hehe = {250, 473 , 75, 75};
     gAnimation.render(posX[y][x], posY[y][x], Renderer, &hehe);
     if(x != u || y != v)

@@ -4,6 +4,8 @@
 #include "LButton.h"
 #include "base.h"
 
+void loadChunk(string path);
+
 void HandlePlayButton(SDL_Event* e, LButton& playButton, bool& play , bool& pause, bool& restart, SDL_Rect* buttonSize);
 
 void HandleSettingButton(SDL_Event* e, LButton& settingButton, bool& pause, bool& music, bool& setting, SDL_Rect* buttonSize, SDL_Renderer *gRenderer, int &pausTime);

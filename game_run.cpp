@@ -15,7 +15,7 @@ bool init()
             std::cout<< "Warning: Linear texture filtering not enabled! \n";
     }
 
-    gWindow = SDL_CreateWindow("Candy Crush Saga", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    gWindow = SDL_CreateWindow("Candy Land", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
     if(gWindow == NULL)
     {

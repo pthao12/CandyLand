@@ -1,5 +1,15 @@
 #include "handle_button.h"
 
+void loadChunk(string path)
+{
+    Mix_Chunk* gChunk = NULL;
+    gChunk = Mix_LoadWAV( path.c_str() );
+    if(gChunk == NULL)
+    {
+        cout<<"Failed to load "<< path.c_str() << "sound effect! SDL_mixer Error: " << Mix_GetError();
+    }
+    Mix_PlayChannel( -1, gChunk, 0 );
+}
 void HandlePlayButton(SDL_Event* e, LButton& playButton, bool& play, bool& pause, bool& restart, SDL_Rect* buttonSize)
 {
     int x, y;
@@ -12,10 +22,14 @@ void HandlePlayButton(SDL_Event* e, LButton& playButton, bool& play, bool& pause
             playButton.currentSprite = BUTTON_MOUSE_OVER_MOTION;
             break;
         case SDL_MOUSEBUTTONDOWN:
+
+            loadChunk("sound/mouse_click.wav");
+
             play = true;
             pause = false;
             restart = true;
             playButton.currentSprite = BUTTON_MOUSE_OVER_MOTION;
+
             break;
         }
     }
@@ -31,6 +45,8 @@ void HandleSettingButton(SDL_Event* e, LButton& settingButton, bool& pause, bool
     {
         if(e->type == SDL_MOUSEBUTTONDOWN)
         {
+            loadChunk("sound/mouse_click.wav");
+
             pauseTime = std::clock();
             pause = true;
             LTexture setting;
@@ -81,6 +97,7 @@ void HandleResumeButton(SDL_Event* e, LButton& resume, bool& pause, bool& settin
     {
         if(e->type == SDL_MOUSEBUTTONDOWN)
         {
+            loadChunk("sound/mouse_click.wav");
             pauseTime = std::clock() - pauseTime;
             pause = false;
             setting = true;
@@ -94,6 +111,7 @@ void HandleHomeButton(SDL_Event* e, LButton& home, bool& played, bool& restart, 
     {
         if(e->type == SDL_MOUSEBUTTONDOWN)
         {
+            loadChunk("sound/mouse_click.wav");
             played = false;
             setting = true;
         }
@@ -106,6 +124,7 @@ void HandleRestartButton(SDL_Event* e, LButton& restartGame, bool& restart, bool
     {
         if(e->type == SDL_MOUSEBUTTONDOWN)
         {
+            loadChunk("sound/mouse_click.wav");
             restart = true;
             pause = false;
             endG = false;
@@ -119,6 +138,7 @@ void HandleUnmuteButton(SDL_Event* e, LButton& unmute, bool& music, SDL_Rect* bu
     if(unmute.handleEvent(e, buttonSize))
         if(e->type == SDL_MOUSEBUTTONDOWN)
         {
+            loadChunk("sound/mouse_click.wav");
             music = true;
             LTexture setting;
             if(!setting.loadFromFile("imgs/unmute.png", gRenderer))
@@ -139,6 +159,7 @@ void HandleMuteButton(SDL_Event* e, LButton& mute, bool& music, SDL_Rect* button
     if(mute.handleEvent(e, buttonSize))
         if(e->type == SDL_MOUSEBUTTONDOWN)
         {
+            loadChunk("sound/mouse_click.wav");
             music = false;
             LTexture setting;
             if(!setting.loadFromFile("imgs/mute.png", gRenderer))
@@ -160,6 +181,9 @@ void HandleExitButton(SDL_Event* e, LButton& exit, SDL_Rect* buttonSize, SDL_Ren
     if(exit.handleEvent(e, buttonSize))
     {
         if(e->type == SDL_MOUSEBUTTONDOWN)
+        {
+            loadChunk("sound/mouse_click.wav");
             std::exit(0);
+        }
     }
 }

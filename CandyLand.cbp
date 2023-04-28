@@ -35,7 +35,6 @@
 		<Unit filename="LButton.h" />
 		<Unit filename="LTexture.cpp" />
 		<Unit filename="LTexture.h" />
-		<Unit filename="base.cpp" />
 		<Unit filename="base.h" />
 		<Unit filename="game_run.cpp" />
 		<Unit filename="game_run.h" />

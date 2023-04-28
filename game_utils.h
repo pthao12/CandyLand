@@ -3,6 +3,7 @@
 
 #include "LButton.h"
 #include "base.h"
+#include "handle_button.h"
 
 #define fi first
 #define se second
@@ -17,31 +18,38 @@
 
 class Game{
     private:
+        SDL_Renderer *Renderer;
+        TTF_Font *Font;
+
         int items[ROW_NUMBER][COLUMN_NUMBER];
         int posX[ROW_NUMBER][COLUMN_NUMBER];
         int posY[ROW_NUMBER][COLUMN_NUMBER];
+
         LTexture gCandy;
         LTexture backGround;
         LTexture gClock;
         LTexture choose;
         LTexture gTextTexture;
         LTexture gAnimation;
+
         SDL_Rect candy[ITEMS_NUMBER + 3];
         SDL_Rect clock[20];
         SDL_Rect bombAnimation[8];
         SDL_Rect stripedEffect[2];
         SDL_Rect board;
-        SDL_Renderer *Renderer;
-        TTF_Font *Font;
-        pair<int, int> selected[2];
+
+        SDL_Point selected[2];
+
         int score = 0;
         int startTime = 0;
         int timeLeft = 0;
+        int timeHint = 0;
         int countSelected = 0;
         int left = 0, right = 0, above = 0, below = 0;
         string oldHighScore;
         int newItem();
         bool drop = false;
+        bool sound = false;
 
     public:
         Game(SDL_Renderer *gRenderer, TTF_Font *gFont)
@@ -57,6 +65,7 @@ class Game{
         void initGame();
         void render();
 
+        void renderCandy();
         void printScoreAndTime();
         void renderClock();
         void renderDrop(int timeDrop);
@@ -84,5 +93,6 @@ class Game{
         void eatBomb(int x, int y);
         void eatStar(int type);
         void eatStriped(int col, int row);
+
 };
 #endif

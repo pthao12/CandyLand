@@ -9,11 +9,12 @@
 
 static LTexture gPlayButton;
 static LTexture start;
+static LButton playButton;
+static LButton settingButton;
 static SDL_Rect play[2];
 static SDL_Rect sizeofSettingButton;
 static SDL_Rect sizeofButton;
-static LButton playButton;
-static LButton settingButton;
+
 
 static LTexture pause;
 static LTexture choose;
