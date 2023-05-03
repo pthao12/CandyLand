@@ -118,6 +118,7 @@ bool Game::loadImage()
 int Game::newItem()
 {
     return rand() % ITEMS_NUMBER;
+    //return rand()%2 + BOMB;
 }
 bool Game::checkInit()
 {
@@ -381,10 +382,11 @@ void Game::bombEffectRender(int x, int y)
         for(int j = 0; j < 4; j++)
         {
             render();
-            gAnimation.render(posX[y][x], posY[y][x], Renderer, &bombAnimation[i*4 + j]);
+            gAnimation.render(posX[y][x] - ITEMS_SIZE, posY[y][x] - ITEMS_SIZE, Renderer, &bombAnimation[i*4 + j]);
             SDL_RenderPresent(Renderer);
             SDL_Delay(75);
         }
+    render();
 }
 
 void Game::stripedEffectRender(int x, int y, int status)
@@ -420,6 +422,7 @@ void Game::stripedEffectRender(int x, int y, int status)
             if(y - k < 0 && y + k > ROW_NUMBER) break;
         }
     }
+    //render();
 }
 
 void Game::render()
@@ -559,7 +562,7 @@ void Game::eatStar(int type)
             for(int j = 0; j < COLUMN_NUMBER; j++)
                 items[i][j] = -1;
     }
-    updateBoard();
+    //updateBoard();
 }
 void Game::eatBomb(int x, int y)
 {
@@ -571,7 +574,7 @@ void Game::eatBomb(int x, int y)
                 items[i][j] = -1;
         }
     }
-    bombEffectRender(x - 1, y - 1);
+    bombEffectRender(x, y);
     for(int i = max(y - 1, 0); i < min(max(y - 1, 0) + 3, ROW_NUMBER); i++)
     {
         for(int j = max(x - 1, 0); j < min(max(x - 1, 0) + 3, COLUMN_NUMBER); j++)
