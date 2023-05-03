@@ -2,7 +2,7 @@
 1679543180 source:c:\users\vuongbahanh\documents\ltnc\game\base.cpp
 	"base.h"
 
-1682707935 c:\users\vuongbahanh\documents\ltnc\game\base.h
+1683131809 c:\users\vuongbahanh\documents\ltnc\game\base.h
 	<bits/stdc++.h>
 	<windows.h>
 	<SDL.h>
@@ -36,7 +36,7 @@
 	"game_run.h"
 	<SDL_events.h>
 
-1683128176 source:c:\users\vuongbahanh\documents\ltnc\game\game_utils.cpp
+1683131796 source:c:\users\vuongbahanh\documents\ltnc\game\game_utils.cpp
 	"game_utils.h"
 
 1682442731 c:\users\vuongbahanh\documents\ltnc\game\lbutton.h
@@ -46,7 +46,7 @@
 1682442738 source:c:\users\vuongbahanh\documents\ltnc\game\lbutton.cpp
 	"LButton.h"
 
-1682711258 c:\users\vuongbahanh\documents\ltnc\game\game_utils.h
+1683129906 c:\users\vuongbahanh\documents\ltnc\game\game_utils.h
 	"LButton.h"
 	"base.h"
 	"handle_button.h"

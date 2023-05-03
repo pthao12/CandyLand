@@ -76,7 +76,7 @@ class Game{
         int eatCandy(int x, int y);
         void eatStar(int type);
         void eatBomb(int x, int y);
-        void eatStriped(int col, int row);
+        void eatStriped(int x, int y, int status);
 
         void updateTouch(int mouseX, int mouseY);
         void updateBoard();

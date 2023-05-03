@@ -118,7 +118,6 @@ bool Game::loadImage()
 int Game::newItem()
 {
     return rand() % ITEMS_NUMBER;
-    //return rand()%2 + BOMB;
 }
 bool Game::checkInit()
 {
@@ -253,22 +252,24 @@ void Game::renderEnd(bool &endG)
         */
     }
     int numberStar = min(score/150, 3);
-    int desX[3];
-    int desY[3];
-
-    desX[0] = 702;
-    desX[1] = 688;
-    desX[2] = 670;
-
-    desY[0] = 314;
-    desY[1] = 300;
-    desY[2] = 282;
+    numberStar = 3;
     if( numberStar == 0)
     {
         SDL_RenderPresent(Renderer);
     }
     if( numberStar >= 1 )
     {
+        int desX[3];
+        int desY[3];
+
+        desX[0] = 462;
+        desX[1] = 448;
+        desX[2] = 430;
+
+        desY[0] = 314;
+        desY[1] = 300;
+        desY[2] = 282;
+
         for(int i = 0; i < 3; i++)
         {
             starScore.render(desX[i], desY[i], Renderer, &star[i]);
@@ -278,7 +279,18 @@ void Game::renderEnd(bool &endG)
     }
     if( numberStar >= 2 )
     {
-        for(int i = 0; i < 3; i++)
+        int desX[3];
+        int desY[3];
+
+        desX[0] = 582;
+        desX[1] = 568;
+        desX[2] = 550;
+
+        desY[0] = 314;
+        desY[1] = 300;
+        desY[2] = 282;
+
+        for(int i = 0; i <= 3; i++)
         {
             starScore.render(desX[i], desY[i], Renderer, &star[i]);
             SDL_RenderPresent(Renderer);
@@ -287,6 +299,16 @@ void Game::renderEnd(bool &endG)
     }
     if( numberStar >= 3 )
     {
+        int desX[3];
+        int desY[3];
+
+        desX[0] = 702;
+        desX[1] = 688;
+        desX[2] = 670;
+
+        desY[0] = 314;
+        desY[1] = 300;
+        desY[2] = 282;
 
         for(int i = 0; i < 3; i++)
         {
@@ -422,7 +444,8 @@ void Game::stripedEffectRender(int x, int y, int status)
             if(y - k < 0 && y + k > ROW_NUMBER) break;
         }
     }
-    //render();
+    render();
+    SDL_Delay(100);
 }
 
 void Game::render()
@@ -592,61 +615,70 @@ void Game::eatBomb(int x, int y)
             else if(items[i][j] == STRIPED)
             {
                 items[i][j] = -1;
-                stripedEffectRender(j, i, HORIZONTAL);
-                eatStriped(-1, i);
+                eatStriped(j, i, HORIZONTAL);
             }
         }
     }
     updateBoard();
 }
-void Game::eatStriped(int col, int row)
+void Game::eatStriped(int x, int y, int status)
 {
-    if(row == -1)
+    if(status == VERTICAL)
     {
         for(int i = 0; i < ROW_NUMBER; i++)
         {
-            if(items[i][col] == STAR)
+            if(items[i][x] < STAR)
             {
-                items[i][col] = -1;
+                items[i][x] = -1;
+            }
+        }
+        stripedEffectRender(x, y, VERTICAL);
+        for(int i = 0; i < ROW_NUMBER; i++)
+        {
+            if(items[i][x] == STAR)
+            {
+                items[i][x] = -1;
                 eatStar(newItem());
             }
-            else if(items[i][col] == BOMB)
+            else if(items[i][x] == BOMB)
             {
-                items[i][col] = -1;
-                eatBomb(col, i);
+                items[i][x] = -1;
+                eatBomb(x, i);
             }
-            else if(items[i][col] == STRIPED)
+            else if(items[i][x] == STRIPED)
             {
-                items[i][col] = -1;
-                stripedEffectRender(col, i, HORIZONTAL);
-                eatStriped(-1, i);
+                items[i][x] = -1;
+                eatStriped(x, i, HORIZONTAL);
             }
-            else
-                items[i][col] = -1;
         }
     }
-    else if(col == -1)
+    else if(status == HORIZONTAL)
     {
         for(int i = 0; i < COLUMN_NUMBER; i++)
         {
-            if(items[row][i] == STAR)
+            if(items[y][i] < STAR)
             {
-                items[row][i] = -1;
+                items[y][i] = -1;
+            }
+        }
+        stripedEffectRender(x, y, HORIZONTAL);
+        for(int i = 0; i < COLUMN_NUMBER; i++)
+        {
+            if(items[y][i] == STAR)
+            {
+                items[y][i] = -1;
                 eatStar(newItem());
             }
-            else if(items[row][i] == BOMB)
+            else if(items[y][i] == BOMB)
             {
-                items[row][i] = -1;
-                eatBomb(i, row);
+                items[y][i] = -1;
+                eatBomb(i, y);
             }
-            else if(items[row][i] == STRIPED)
+            else if(items[y][i] == STRIPED)
             {
-                items[row][i] = -1;
-                stripedEffectRender(i, row, VERTICAL);
-                eatStriped(i, -1);
+                items[y][i] = -1;
+                eatStriped(i, y, VERTICAL);
             }
-            else
-                items[row][i] = -1;
         }
     }
 }
@@ -740,14 +772,12 @@ void Game::updateGame()
             if(x == u)
             {
                 items[y][x] = -1;
-                stripedEffectRender(x, y, VERTICAL);
-                eatStriped(x, -1);
+                eatStriped(x, y, VERTICAL);
             }
             else if(y == v)
             {
                 items[y][x] = -1;
-                stripedEffectRender(x, y, HORIZONTAL);
-                eatStriped(-1, y);
+                eatStriped(x, y, HORIZONTAL);
             }
         }
         else if(items[v][u] == STRIPED)
@@ -755,14 +785,12 @@ void Game::updateGame()
             if(x == u)
             {
                 items[v][u] = -1;
-                stripedEffectRender(u, v, VERTICAL);
-                eatStriped(u, -1);
+                eatStriped(u, v, VERTICAL);
             }
             else if(y == v)
             {
                 items[v][u] = -1;
-                stripedEffectRender(u, v, HORIZONTAL);
-                eatStriped(-1, v);
+                eatStriped(u, v, HORIZONTAL);
             }
         }
         else if(horizontal(x, y) + vertical(x, y) + horizontal(u, v) + vertical(u, v) == 0)
