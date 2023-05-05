@@ -17,6 +17,7 @@
 using namespace std;
 
 #define endl '\n'
+
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
 const int PLAY_BUTTON_POSX = 466;
@@ -29,7 +30,7 @@ const int ITEMS_SIZE = 75;
 const int COLUMN_NUMBER = 12;
 const int ROW_NUMBER = 7;
 const int ITEMS_NUMBER = 6;
-const int timeGame = 10;
+const int timeGame = 120;
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gRenderer = NULL;
 static TTF_Font* gFont = NULL;

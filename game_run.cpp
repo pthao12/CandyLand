@@ -113,7 +113,7 @@ bool loadMedia()
         sizeofButton.h = 79;
     }
 
-    gMusic = Mix_LoadMUS("sound/ưng quá chừng.mp3");
+    gMusic = Mix_LoadMUS("sound/Oneul - (Strawberry Dance) 🍓.mp3");
     if( gMusic == NULL )
 	{
 		std::cout<< "Failed to load beat music! SDL_mixer Error: " << Mix_GetError() <<endl;
@@ -162,7 +162,7 @@ void run()
             {
                 Mix_PlayMusic( gMusic, -1 );
             }
-            Game hehe(gRenderer, gFont);
+            Game CandyLand(gRenderer, gFont);
             while(!quit)
             {
                 SDL_PollEvent(&e);
@@ -176,7 +176,7 @@ void run()
                 }
                 if(e.type == SDL_QUIT)
                 {
-                    hehe.updateHighScore();
+                    CandyLand.updateHighScore();
                     quit = true;
                 }
                 if(!played){
@@ -203,6 +203,7 @@ void run()
                         HandleRestartButton(&e, restartGame, restart, pause, endG, setting, &sizeofButton, gRenderer);
                         HandleHomeButton(&e, home, played, restart, setting, &sizeofButton, gRenderer);
                         HandleExitButton(&e, exit, &sizeofButton, gRenderer);
+                        CandyLand.updateHighScore();
                     }
                     else
                     {
@@ -235,7 +236,7 @@ void run()
                         {
                             int x, y;
                             SDL_GetMouseState( &x, &y);
-                            hehe.play(&e, x, y, restart, endG, pauseTime);
+                            CandyLand.play(&e, x, y, restart, endG, pauseTime);
                         }
                     }
                 }

@@ -87,7 +87,6 @@ void LTexture::render(int x, int y, SDL_Renderer* gRenderer, SDL_Rect* clip)
 		renderQuad.w = clip->w;
 		renderQuad.h = clip->h;
 	}
-	//gSelection.render(0, 0, gRenderer, &play[playButton.currentSprite]);
 	SDL_RenderCopy(gRenderer, mTexture, clip, &renderQuad);
 }
 

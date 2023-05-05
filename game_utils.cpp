@@ -26,6 +26,7 @@ void Game::play(SDL_Event* e, int x, int y, bool& restart, bool& endG, int &paus
             initGame();
         restart = false;
         pauseTime = 0;
+        updateHighScore();
     }
     if(restart == false){
         timeLeft = timeGame - ((std::clock() - startTime - pauseTime) / (double)CLOCKS_PER_SEC);
@@ -145,7 +146,6 @@ bool Game::checkInit()
 
 void Game::initGame()
 {
-    //khởi tạo hình cho các viên kẹo
     srand(time(0));
     for(int i = 0; i < ROW_NUMBER; i++)
     {
@@ -157,7 +157,6 @@ void Game::initGame()
         }
     }
     while(checkInit());
-    //cắt ảnh các viên kẹo
     getHighScore();
     score = 0;
     countSelected = 0;
@@ -235,24 +234,8 @@ void Game::renderEnd(bool &endG)
         star[0] = {0, 0, 45, 45};
         star[1] = {102, 0, 74, 74};
         star[2] = {270, 0, 110, 110};
-        /*star[0].x = 0;
-        star[0].y = 0;
-        star[0].w = 45;
-        star[0].h = 45;
-
-        star[1].x = 102;
-        star[1].y = 0;
-        star[1].w = 74;
-        star[1].h = 74;
-
-        star[2].x = 270;
-        star[2].y = 0;
-        star[2].w = 110;
-        star[2].h = 110;
-        */
     }
     int numberStar = min(score/150, 3);
-    numberStar = 3;
     if( numberStar == 0)
     {
         SDL_RenderPresent(Renderer);
@@ -585,7 +568,6 @@ void Game::eatStar(int type)
             for(int j = 0; j < COLUMN_NUMBER; j++)
                 items[i][j] = -1;
     }
-    //updateBoard();
 }
 void Game::eatBomb(int x, int y)
 {
@@ -813,8 +795,8 @@ void Game::updateGame()
 }
 void Game::getHighScore()
 {
-    fstream HighScoreFile ("HighScore.txt");
-    if(HighScoreFile.is_open())
+    ifstream HighScoreFile ("HighScore.txt");
+    if(HighScoreFile.is_open() && !HighScoreFile.eof())
     {
         HighScoreFile >> oldHighScore;
         HighScoreFile.close();
@@ -823,9 +805,9 @@ void Game::getHighScore()
 
 void Game::updateHighScore()
 {
-    ofstream HighScoreFile ("HighScore.txt");
     if(score > stringToInt(oldHighScore))
     {
+        ofstream HighScoreFile ("HighScore.txt");
         HighScoreFile << to_string(score);
         HighScoreFile.close();
     }
