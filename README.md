@@ -32,8 +32,8 @@ Trò chơi được lấy ý tưởng từ tưởng từ trò chơi nổi tiến
 - 1 ⭐ ~ 150 điểm 
 
 ## 📩 Cách cài đặt  <a name="paragraph3"></a>
-Tải về `link` và giải nén nó
-Chạy file CandLand.exe.
+- Tải về [`link`](https://github.com/pthao12/Game/tree/testo/CandyLand) và giải nén.
+- Sau khi giải nén chạy CandLand.exe để bắt đầu game.
 
 ## Nguồn  <a name="paragraph4"></a>
 - [start](https://www.freepik.com/free-vector/colorful-candy-land-background_2306400.htm)
