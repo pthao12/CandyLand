@@ -1,5 +1,11 @@
 # CandyLand
 Đây là dự án game cá nhân của mình được tạo bới ngôn ngữ C++ và SDL2. Dự án này là một bài tập lớn của môn học Lập Trình Nâng Cao tại trường Đại học Công Nghệ, VNU Hà Nội.
+![image](https://github.com/pthao12/CandyLand/assets/125387948/149c2989-0906-4b0c-ac5e-127df695690c)
+
+![image](https://github.com/pthao12/CandyLand/assets/125387948/9faefeaf-756c-4d90-a753-6533df187873)
+
+![image](https://github.com/pthao12/CandyLand/assets/125387948/fe23b9cc-de6b-4638-922b-24907fe6d347)
+
 ## 🕵️ Mục lục
 1. [Thông tin](#introduction)
 2. [Ý tưởng](#paragraph1)
